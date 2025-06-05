@@ -11,7 +11,10 @@
     <h1>GitHub Merge Guardian</h1>
 
     <section class="rulesets-section">
-      <h2>Rulesets</h2>
+      <div class="section-header">
+        <h2>Rulesets</h2>
+        <button id="load-preset" class="preset-button">Load RM Role preset</button>
+      </div>
       <p class="description">
         Higher rules take precedence over lower ones. When applying the rules, the first matching rule in the list
         determines
@@ -43,6 +46,19 @@
   </div>
 
   <script src="popup.js"></script>
+
+  <!-- Custom confirmation modal -->
+  <div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+      <h3>Load RM Role Preset</h3>
+      <p id="confirmation-message">You have existing rules. What would you like to do?</p>
+      <div class="modal-buttons">
+        <button id="replace-rules" class="modal-button primary">Replace all rules</button>
+        <button id="add-rules" class="modal-button secondary">Add to existing rules</button>
+        <button id="cancel-preset" class="modal-button cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

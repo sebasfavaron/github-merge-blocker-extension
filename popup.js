@@ -106,6 +106,33 @@ function createRuleRow(rule, index) {
 function setupEventListeners() {
   // Add rule button
   document.getElementById('add-rule').addEventListener('click', addRule);
+
+  // Load preset button
+  document
+    .getElementById('load-preset')
+    .addEventListener('click', loadRMRolePreset);
+
+  // Modal buttons
+  document.getElementById('replace-rules').addEventListener('click', () => {
+    applyPreset('replace');
+    hideModal();
+  });
+
+  document.getElementById('add-rules').addEventListener('click', () => {
+    applyPreset('add');
+    hideModal();
+  });
+
+  document.getElementById('cancel-preset').addEventListener('click', hideModal);
+
+  // Close modal when clicking outside
+  document
+    .getElementById('confirmation-modal')
+    .addEventListener('click', (e) => {
+      if (e.target.id === 'confirmation-modal') {
+        hideModal();
+      }
+    });
 }
 
 // Add a new rule
@@ -134,6 +161,73 @@ function updateRule(index, field, value) {
 // Delete a rule
 function deleteRule(index) {
   rules.splice(index, 1);
+  renderRules();
+  saveSettings();
+}
+
+// Load RM Role preset
+function loadRMRolePreset() {
+  if (rules.length > 0) {
+    // Show custom modal for existing rules
+    showModal();
+  } else {
+    // No existing rules, just apply the preset
+    applyPreset('replace');
+  }
+}
+
+// Show confirmation modal
+function showModal() {
+  document.getElementById('confirmation-modal').style.display = 'block';
+}
+
+// Hide confirmation modal
+function hideModal() {
+  document.getElementById('confirmation-modal').style.display = 'none';
+}
+
+// Apply the preset rules
+function applyPreset(action) {
+  // Define the RM Role preset rules
+  const presetRules = [
+    {
+      owner: '*',
+      repository: '*',
+      baseBranch: '*',
+      compareBranch: '*mergeback*',
+      mergeStrategy: 'merge',
+    },
+    {
+      owner: '*',
+      repository: '*',
+      baseBranch: 'master',
+      compareBranch: '*',
+      mergeStrategy: 'squash',
+    },
+    {
+      owner: '*',
+      repository: '*',
+      baseBranch: 'develop',
+      compareBranch: '*',
+      mergeStrategy: 'squash',
+    },
+    {
+      owner: '*',
+      repository: '*',
+      baseBranch: '*',
+      compareBranch: 'fix/*',
+      mergeStrategy: 'squash',
+    },
+  ];
+
+  if (action === 'replace') {
+    // Replace all rules
+    rules = presetRules;
+  } else if (action === 'add') {
+    // Add preset rules to the beginning (higher precedence)
+    rules = [...presetRules, ...rules];
+  }
+
   renderRules();
   saveSettings();
 }
