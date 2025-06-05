@@ -485,8 +485,13 @@ function applyPreset(action) {
   // Define the RM Role preset rules
   const presetRules = [
     {
-      compareBranch: '*mergeback*',
-
+      baseBranch: 'release*',
+      compareBranch: 'master*',
+      mergeStrategy: 'merge',
+    },
+    {
+      baseBranch: 'develop',
+      compareBranch: 'release*',
       mergeStrategy: 'merge',
     },
     {
@@ -494,11 +499,6 @@ function applyPreset(action) {
       mergeStrategy: 'squash',
     },
     {
-      baseBranch: 'master',
-      mergeStrategy: 'squash',
-    },
-    {
-      baseBranch: 'develop',
       mergeStrategy: 'squash',
     },
   ];
