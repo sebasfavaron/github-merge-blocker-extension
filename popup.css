@@ -1,5 +1,5 @@
 body {
-  width: 800px;
+  width: 900px;
   min-height: 600px;
   margin: 0;
   padding: 0;
@@ -51,10 +51,17 @@ h3 {
   overflow: hidden;
 }
 
+.rules-table-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
 .rules-header {
   display: grid;
-  grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 60px;
-  gap: 12px;
+  grid-template-columns:
+    20px minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 1fr)
+    minmax(100px, 1fr) minmax(110px, 1fr) 60px;
+  gap: 8px;
   padding: 12px;
   background-color: #f6f8fa;
   border-bottom: 1px solid #d0d7de;
@@ -63,6 +70,7 @@ h3 {
   color: #656d76;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  min-width: 750px;
 }
 
 .column-header {
@@ -81,11 +89,14 @@ h3 {
 
 .rule-row {
   display: grid;
-  grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 60px;
-  gap: 12px;
+  grid-template-columns:
+    20px minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 1fr)
+    minmax(100px, 1fr) minmax(110px, 1fr) 60px;
+  gap: 8px;
   padding: 12px;
   border-bottom: 1px solid #d0d7de;
   align-items: center;
+  min-width: 750px;
 }
 
 .rule-row:last-child {
