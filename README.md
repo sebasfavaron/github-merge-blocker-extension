@@ -1,3 +1,5 @@
+https://github.com/user-attachments/assets/1a5ab2c9-41ce-423e-aa61-d93782bd4c44
+
 # GitHub Merge Guardian
 
 A Chrome extension that controls GitHub pull request merge options based on configurable rules.
