@@ -7,29 +7,16 @@
 
   // Initialize the extension
   async function init() {
-    console.log('GitHub Merge Guardian: Initializing...');
     try {
       await loadSettings();
-      console.log(
-        'GitHub Merge Guardian: Settings loaded, extracting page info...'
-      );
       extractPageInfo();
 
       if (currentPageInfo) {
-        console.log(
-          'GitHub Merge Guardian: Page info extracted:',
-          currentPageInfo
-        );
         applyMergeRules();
-      } else {
-        console.log(
-          'GitHub Merge Guardian: No page info found - not a PR page?'
-        );
       }
 
       // Watch for dynamic changes to the page
       observePageChanges();
-      console.log('GitHub Merge Guardian: Page observer started');
     } catch (error) {
       console.error('GitHub Merge Guardian: Error initializing:', error);
     }
@@ -41,7 +28,6 @@
       const result = await chrome.storage.sync.get({
         rules: [],
       });
-      console.log('GitHub Merge Guardian: Settings loaded:', result);
       settings = result;
     } catch (error) {
       console.error('GitHub Merge Guardian: Error loading settings:', error);
@@ -115,8 +101,6 @@
           if (fromMatch) branchInfo.compare = fromMatch[1];
         }
       }
-
-      console.log('GitHub Merge Guardian: Extracted branch info:', branchInfo);
     } catch (error) {
       console.error(
         'GitHub Merge Guardian: Error extracting branch info:',
@@ -129,28 +113,14 @@
 
   // Apply merge rules to disable inappropriate merge options
   function applyMergeRules() {
-    console.log('GitHub Merge Guardian: Applying merge rules...');
-    console.log('GitHub Merge Guardian: Current settings:', settings);
-    console.log('GitHub Merge Guardian: Current page info:', currentPageInfo);
-
     if (!settings || !settings.rules || !currentPageInfo) {
-      console.log(
-        'GitHub Merge Guardian: Missing settings or page info, aborting'
-      );
       return;
     }
 
     const matchingRule = findMatchingRule();
-    console.log('GitHub Merge Guardian: Matching rule found:', matchingRule);
 
     if (matchingRule) {
-      console.log(
-        'GitHub Merge Guardian: Applying rule - allowed strategy:',
-        matchingRule.mergeStrategy
-      );
       disableUnwantedMergeOptions(matchingRule.mergeStrategy);
-    } else {
-      console.log('GitHub Merge Guardian: No matching rule found');
     }
   }
 
@@ -190,11 +160,6 @@
 
   // Disable unwanted merge options
   function disableUnwantedMergeOptions(allowedStrategy) {
-    console.log(
-      'GitHub Merge Guardian: Trying to disable unwanted merge options, allowed:',
-      allowedStrategy
-    );
-
     let buttonsFound = 0;
     let buttonsDisabled = 0;
 
@@ -210,10 +175,6 @@
 
     // Method 1: Check dropdown items if dropdown is open
     const dropdownItems = document.querySelectorAll('[role="menuitemradio"]');
-    console.log(
-      'GitHub Merge Guardian: Found dropdown items:',
-      dropdownItems.length
-    );
 
     dropdownItems.forEach((item) => {
       const isSelected = item.getAttribute('aria-checked') === 'true';
@@ -225,10 +186,6 @@
         : '';
 
       if (isSelected) {
-        console.log(
-          'GitHub Merge Guardian: Currently selected option:',
-          labelText
-        );
         // Determine which strategy this corresponds to
         Object.keys(strategyMap).forEach((strategy) => {
           const keywords = strategyMap[strategy];
@@ -241,30 +198,18 @@
 
     // Method 2: If dropdown not available, try alternative detection methods
     if (!currentlySelected) {
-      console.log(
-        'GitHub Merge Guardian: Dropdown not open, trying alternative detection...'
-      );
-
       // Check if there's any text indicator near the merge button
       const mergeButtonContainer = document.querySelector(
         '.prc-ButtonGroup-ButtonGroup-vcMeG'
       );
       if (mergeButtonContainer) {
         const containerText = mergeButtonContainer.textContent.toLowerCase();
-        console.log(
-          'GitHub Merge Guardian: Button container text:',
-          containerText
-        );
 
         // Check for strategy indicators in surrounding text
         Object.keys(strategyMap).forEach((strategy) => {
           const keywords = strategyMap[strategy];
           if (keywords.some((keyword) => containerText.includes(keyword))) {
             currentlySelected = strategy;
-            console.log(
-              'GitHub Merge Guardian: Detected strategy from container:',
-              strategy
-            );
           }
         });
       }
@@ -282,19 +227,10 @@
             value.includes('squash') ||
             value.includes('rebase')
           ) {
-            console.log(
-              'GitHub Merge Guardian: Found hidden input:',
-              name,
-              value
-            );
             Object.keys(strategyMap).forEach((strategy) => {
               const keywords = strategyMap[strategy];
               if (keywords.some((keyword) => value.includes(keyword))) {
                 currentlySelected = strategy;
-                console.log(
-                  'GitHub Merge Guardian: Detected strategy from hidden input:',
-                  strategy
-                );
               }
             });
           }
@@ -304,16 +240,8 @@
       // Method 4: Default assumption - GitHub typically defaults to merge commit
       if (!currentlySelected) {
         currentlySelected = 'merge'; // GitHub's default is usually merge commit
-        console.log(
-          'GitHub Merge Guardian: Using default assumption: merge commit'
-        );
       }
     }
-
-    console.log(
-      'GitHub Merge Guardian: Final detected strategy:',
-      currentlySelected
-    );
 
     // 1. Target the main merge button and disable it if wrong strategy is selected
     const mainMergeButtons = document.querySelectorAll(
@@ -326,7 +254,6 @@
         buttonText.includes('merge')
       ) {
         buttonsFound++;
-        console.log('GitHub Merge Guardian: Found main merge button:', button);
 
         // Disable main button if currently selected strategy doesn't match allowed
         if (currentlySelected && currentlySelected !== allowedStrategy) {
@@ -336,9 +263,6 @@
           button.title = `GitHub Merge Guardian: Change merge method to "${allowedStrategy}" to enable this button`;
           button.classList.add('github-merge-guardian-disabled');
           buttonsDisabled++;
-          console.log(
-            `GitHub Merge Guardian: Disabled main merge button - current: ${currentlySelected}, allowed: ${allowedStrategy}`
-          );
         } else {
           // Re-enable if it was previously disabled and now correct strategy is selected
           if (button.classList.contains('github-merge-guardian-disabled')) {
@@ -347,9 +271,6 @@
             button.style.cursor = '';
             button.title = '';
             button.classList.remove('github-merge-guardian-disabled');
-            console.log(
-              'GitHub Merge Guardian: Enabled main merge button - correct strategy selected'
-            );
           }
         }
       }
@@ -367,8 +288,6 @@
         ? labelElement.textContent.toLowerCase()
         : '';
 
-      console.log('GitHub Merge Guardian: Checking dropdown item:', labelText);
-
       // Check if this item should be disabled
       let shouldDisable = false;
 
@@ -377,9 +296,6 @@
           const keywords = strategyMap[strategy];
           if (keywords.some((keyword) => labelText.includes(keyword))) {
             shouldDisable = true;
-            console.log(
-              `GitHub Merge Guardian: Should disable "${labelText}" (not ${allowedStrategy})`
-            );
           }
         }
       });
@@ -398,18 +314,11 @@
           (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log(
-              'GitHub Merge Guardian: Blocked click on disabled option'
-            );
           },
           true
         );
 
         buttonsDisabled++;
-        console.log(
-          'GitHub Merge Guardian: Disabled dropdown item:',
-          labelText
-        );
       } else {
         // Re-enable if it was previously disabled and is now the allowed strategy
         if (item.classList.contains('github-merge-guardian-disabled')) {
@@ -418,10 +327,6 @@
           item.style.cursor = '';
           item.style.pointerEvents = '';
           item.classList.remove('github-merge-guardian-disabled');
-          console.log(
-            'GitHub Merge Guardian: Re-enabled dropdown item:',
-            labelText
-          );
         }
       }
     });
@@ -461,21 +366,10 @@
             button.title = `Disabled by GitHub Merge Guardian rule - Only ${allowedStrategy} allowed`;
             button.classList.add('github-merge-guardian-disabled');
             buttonsDisabled++;
-            console.log('GitHub Merge Guardian: Disabled button:', allText);
           }
         }
       });
     });
-
-    console.log(
-      `GitHub Merge Guardian: Found ${buttonsFound} buttons, disabled ${buttonsDisabled}`
-    );
-
-    if (dropdownItems.length === 0) {
-      console.log(
-        'GitHub Merge Guardian: No dropdown items found - using alternative detection methods'
-      );
-    }
   }
 
   // Observe page changes for dynamic content
@@ -502,9 +396,6 @@
                   node.classList.contains('prc-Overlay-Overlay-dVyJl') ||
                   node.classList.contains('prc-ActionList-ActionList-X4RiC'))
               ) {
-                console.log(
-                  'GitHub Merge Guardian: Detected merge-related content change'
-                );
                 shouldReapply = true;
               }
             }
@@ -513,9 +404,6 @@
       });
 
       if (shouldReapply) {
-        console.log(
-          'GitHub Merge Guardian: Reapplying rules due to page changes'
-        );
         setTimeout(() => {
           extractPageInfo();
           applyMergeRules();
@@ -530,7 +418,6 @@
 
     // Also try to reapply rules periodically for dynamic content
     setInterval(() => {
-      console.log('GitHub Merge Guardian: Periodic reapplication check');
       applyMergeRules();
     }, 2000);
   }

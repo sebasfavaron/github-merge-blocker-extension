@@ -32,7 +32,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
     try {
       await chrome.storage.sync.set(defaultSettings);
-      console.log('GitHub Merge Guardian: Default settings initialized');
     } catch (error) {
       console.error(
         'GitHub Merge Guardian: Error setting default settings:',
@@ -63,5 +62,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.action.onClicked.addListener((tab) => {
   // This is only called if no popup is set in manifest
   // Since we have a popup, this won't be triggered normally
-  console.log('GitHub Merge Guardian: Extension icon clicked');
 });
