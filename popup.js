@@ -53,50 +53,78 @@ function renderRules() {
   });
 }
 
-// Create a rule row element
+// Create a rule card element
 function createRuleRow(rule, index) {
-  const row = document.createElement('div');
-  row.className = 'rule-row';
-  row.setAttribute('data-index', index);
-  row.draggable = true;
+  const card = document.createElement('div');
+  card.className = 'rule-card';
+  card.setAttribute('data-index', index);
+  card.draggable = true;
 
-  row.innerHTML = `
-    <div class="drag-handle"></div>
-    <input type="text" class="rule-input" data-field="owner" value="${
-      rule.owner
-    }" placeholder="*">
-    <input type="text" class="rule-input" data-field="repository" value="${
-      rule.repository
-    }" placeholder="*">
-    <input type="text" class="rule-input" data-field="baseBranch" value="${
-      rule.baseBranch
-    }" placeholder="*">
-    <input type="text" class="rule-input" data-field="compareBranch" value="${
-      rule.compareBranch
-    }" placeholder="*">
-    <input type="text" class="rule-input" data-field="labels" value="${
-      rule.labels || ''
-    }" placeholder="*">
-    <select class="rule-select" data-field="mergeStrategy">
-      <option value="merge" ${
-        rule.mergeStrategy === 'merge' ? 'selected' : ''
-      }>${MERGE_STRATEGIES.merge}</option>
-      <option value="squash" ${
-        rule.mergeStrategy === 'squash' ? 'selected' : ''
-      }>${MERGE_STRATEGIES.squash}</option>
-      <option value="rebase" ${
-        rule.mergeStrategy === 'rebase' ? 'selected' : ''
-      }>${MERGE_STRATEGIES.rebase}</option>
-    </select>
-    <button class="delete-button" title="Delete rule">
-      <svg viewBox="0 0 16 16" fill="currentColor">
-        <path d="M11 1.75V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.575l.66-6.6a.75.75 0 00-1.492-.15L10.845 13.5H5.155l-.659-6.825z"/>
-      </svg>
-    </button>
+  card.innerHTML = `
+    <div class="rule-card-header">
+      <div class="priority-badge">
+        <div class="priority-number">${index + 1}</div>
+        <span>Priority</span>
+      </div>
+      <div class="rule-actions">
+        <div class="drag-handle" title="Drag to reorder"></div>
+        <button class="delete-button" title="Delete rule">
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <path d="M11 1.75V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.575l.66-6.6a.75.75 0 00-1.492-.15L10.845 13.5H5.155l-.659-6.825z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="rule-fields">
+      <div class="field-group">
+        <label class="field-label">Owner</label>
+        <input type="text" class="rule-input" data-field="owner" value="${
+          rule.owner
+        }" placeholder="*">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Repository</label>
+        <input type="text" class="rule-input" data-field="repository" value="${
+          rule.repository
+        }" placeholder="*">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Base Branch</label>
+        <input type="text" class="rule-input" data-field="baseBranch" value="${
+          rule.baseBranch
+        }" placeholder="*">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Compare Branch</label>
+        <input type="text" class="rule-input" data-field="compareBranch" value="${
+          rule.compareBranch
+        }" placeholder="*">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Labels</label>
+        <input type="text" class="rule-input" data-field="labels" value="${
+          rule.labels || ''
+        }" placeholder="* (comma-separated)">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Merge Strategy</label>
+        <select class="rule-select" data-field="mergeStrategy">
+          <option value="merge" ${
+            rule.mergeStrategy === 'merge' ? 'selected' : ''
+          }>${MERGE_STRATEGIES.merge}</option>
+          <option value="squash" ${
+            rule.mergeStrategy === 'squash' ? 'selected' : ''
+          }>${MERGE_STRATEGIES.squash}</option>
+          <option value="rebase" ${
+            rule.mergeStrategy === 'rebase' ? 'selected' : ''
+          }>${MERGE_STRATEGIES.rebase}</option>
+        </select>
+      </div>
+    </div>
   `;
 
   // Add event listeners for inputs
-  const inputs = row.querySelectorAll('.rule-input, .rule-select');
+  const inputs = card.querySelectorAll('.rule-input, .rule-select');
   inputs.forEach((input) => {
     input.addEventListener('input', (e) =>
       updateRule(index, e.target.dataset.field, e.target.value)
@@ -104,13 +132,13 @@ function createRuleRow(rule, index) {
   });
 
   // Add delete button listener
-  const deleteButton = row.querySelector('.delete-button');
+  const deleteButton = card.querySelector('.delete-button');
   deleteButton.addEventListener('click', () => deleteRule(index));
 
   // Add drag and drop event listeners
-  setupDragAndDrop(row, index);
+  setupDragAndDrop(card, index);
 
-  return row;
+  return card;
 }
 
 // Setup event listeners
@@ -160,10 +188,10 @@ function setupRulesListDragAndDrop() {
     const draggedElement = document.querySelector('.dragging');
     if (!draggedElement) return;
 
-    // If we're not over a specific rule row, handle container-level positioning
+    // If we're not over a specific rule card, handle container-level positioning
     if (
-      !e.target.closest('.rule-row') ||
-      e.target.closest('.rule-row').classList.contains('dragging')
+      !e.target.closest('.rule-card') ||
+      e.target.closest('.rule-card').classList.contains('dragging')
     ) {
       const afterElement = getDragAfterElement(rulesList, e.clientY);
 
@@ -173,16 +201,16 @@ function setupRulesListDragAndDrop() {
         rulesList.insertBefore(draggedElement, afterElement);
       }
 
-      // Clean up any row-specific visual feedback
-      document.querySelectorAll('.rule-row').forEach((row) => {
-        row.classList.remove('drag-above', 'drag-below', 'drag-over');
+      // Clean up any card-specific visual feedback
+      document.querySelectorAll('.rule-card').forEach((card) => {
+        card.classList.remove('drag-above', 'drag-below', 'drag-over');
       });
     }
   });
 
   rulesList.addEventListener('drop', (e) => {
     e.preventDefault();
-    // The row's dragend event will handle the final update
+    // The card's dragend event will handle the final update
   });
 }
 
@@ -288,34 +316,34 @@ function applyPreset(action) {
   saveSettings();
 }
 
-// Setup drag and drop for a rule row
-function setupDragAndDrop(row, index) {
+// Setup drag and drop for a rule card
+function setupDragAndDrop(card, index) {
   // Drag start
-  row.addEventListener('dragstart', (e) => {
+  card.addEventListener('dragstart', (e) => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
 
-    row.classList.add('dragging');
+    card.classList.add('dragging');
     window.draggedIndex = index;
-    window.draggedElement = row;
+    window.draggedElement = card;
   });
 
   // Drag end
-  row.addEventListener('dragend', (e) => {
-    row.classList.remove('dragging');
+  card.addEventListener('dragend', (e) => {
+    card.classList.remove('dragging');
     cleanupDragEffects();
 
     // Update the order based on final DOM positions
     updateRuleOrderFromDOM();
   });
 
-  // Drag over for individual rows
-  row.addEventListener('dragover', (e) => {
+  // Drag over for individual cards
+  card.addEventListener('dragover', (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
 
     const draggedElement = document.querySelector('.dragging');
-    if (!draggedElement || draggedElement === row) return;
+    if (!draggedElement || draggedElement === card) return;
 
     const container = document.getElementById('rules-list');
     const afterElement = getDragAfterElement(container, e.clientY);
@@ -328,23 +356,23 @@ function setupDragAndDrop(row, index) {
     }
 
     // Add visual feedback
-    updateDragVisualFeedback(row, e.clientY);
+    updateDragVisualFeedback(card, e.clientY);
   });
 
   // Drag enter
-  row.addEventListener('dragenter', (e) => {
+  card.addEventListener('dragenter', (e) => {
     e.preventDefault();
-    if (!row.classList.contains('dragging')) {
-      row.classList.add('drag-over');
+    if (!card.classList.contains('dragging')) {
+      card.classList.add('drag-over');
     }
   });
 
   // Drag leave
-  row.addEventListener('dragleave', (e) => {
+  card.addEventListener('dragleave', (e) => {
     e.preventDefault();
     // Only remove drag-over if we're actually leaving the element
-    if (!row.contains(e.relatedTarget)) {
-      row.classList.remove('drag-over');
+    if (!card.contains(e.relatedTarget)) {
+      card.classList.remove('drag-over');
     }
   });
 }
@@ -352,12 +380,12 @@ function setupDragAndDrop(row, index) {
 // Update rule order based on current DOM positions
 function updateRuleOrderFromDOM() {
   const rulesList = document.getElementById('rules-list');
-  const allRows = rulesList.querySelectorAll('.rule-row');
+  const allCards = rulesList.querySelectorAll('.rule-card');
   const newOrder = [];
 
   // Build new order based on current DOM order
-  allRows.forEach((row) => {
-    const originalIndex = parseInt(row.getAttribute('data-index'));
+  allCards.forEach((card) => {
+    const originalIndex = parseInt(card.getAttribute('data-index'));
     if (!isNaN(originalIndex) && rules[originalIndex]) {
       newOrder.push(rules[originalIndex]);
     }
@@ -374,7 +402,7 @@ function updateRuleOrderFromDOM() {
 // Get the element after which the dragged element should be inserted
 function getDragAfterElement(container, y) {
   const draggableElements = [
-    ...container.querySelectorAll('.rule-row:not(.dragging)'),
+    ...container.querySelectorAll('.rule-card:not(.dragging)'),
   ];
 
   return draggableElements.reduce(
@@ -393,29 +421,29 @@ function getDragAfterElement(container, y) {
 }
 
 // Update visual feedback during drag
-function updateDragVisualFeedback(hoveredRow, mouseY) {
+function updateDragVisualFeedback(hoveredCard, mouseY) {
   // Remove previous feedback
-  document.querySelectorAll('.rule-row').forEach((row) => {
-    row.classList.remove('drag-over', 'drag-above', 'drag-below');
+  document.querySelectorAll('.rule-card').forEach((card) => {
+    card.classList.remove('drag-over', 'drag-above', 'drag-below');
   });
 
-  if (!hoveredRow || hoveredRow.classList.contains('dragging')) return;
+  if (!hoveredCard || hoveredCard.classList.contains('dragging')) return;
 
-  const rect = hoveredRow.getBoundingClientRect();
+  const rect = hoveredCard.getBoundingClientRect();
   const middleY = rect.top + rect.height / 2;
 
   if (mouseY < middleY) {
-    hoveredRow.classList.add('drag-above');
+    hoveredCard.classList.add('drag-above');
   } else {
-    hoveredRow.classList.add('drag-below');
+    hoveredCard.classList.add('drag-below');
   }
 }
 
 // Clean up drag effects
 function cleanupDragEffects() {
-  const allRows = document.querySelectorAll('.rule-row');
-  allRows.forEach((row) => {
-    row.classList.remove('dragging', 'drag-over', 'drag-above', 'drag-below');
+  const allCards = document.querySelectorAll('.rule-card');
+  allCards.forEach((card) => {
+    card.classList.remove('dragging', 'drag-over', 'drag-above', 'drag-below');
   });
   window.draggedIndex = null;
   window.draggedElement = null;
