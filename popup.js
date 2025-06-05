@@ -10,10 +10,7 @@ const FIELD_OPTIONS = {
   baseBranch: { label: 'Base Branch', placeholder: '' },
   compareBranch: { label: 'Compare Branch', placeholder: '' },
   labels: { label: 'Labels', placeholder: '' },
-  mergeStrategy: {
-    label: 'Merge Strategy',
-    placeholder: 'Required merge method',
-  },
+  mergeStrategy: { label: 'Merge Strategy', placeholder: '' },
 };
 
 let rules = [];
@@ -489,10 +486,11 @@ function applyPreset(action) {
   const presetRules = [
     {
       compareBranch: '*mergeback*',
+
       mergeStrategy: 'merge',
     },
     {
-      compareBranch: 'fix/*',
+      labels: '*fix*',
       mergeStrategy: 'squash',
     },
     {
