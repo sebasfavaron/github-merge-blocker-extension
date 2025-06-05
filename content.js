@@ -52,6 +52,7 @@
       repository,
       baseBranch: branchInfo.base || '',
       compareBranch: branchInfo.compare || '',
+      labels: extractLabels(),
     };
 
     return currentPageInfo;
@@ -111,6 +112,51 @@
     return branchInfo;
   }
 
+  // Extract labels from the PR page
+  function extractLabels() {
+    const labels = [];
+
+    try {
+      // Look for labels in the issue labels container
+      const labelElements = document.querySelectorAll(
+        '.js-issue-labels .IssueLabel'
+      );
+
+      labelElements.forEach((labelElement) => {
+        // Try to get label name from data-name attribute
+        const labelName = labelElement.getAttribute('data-name');
+        if (labelName) {
+          labels.push(labelName);
+        } else {
+          // Fallback: get text content from the span inside
+          const textElement = labelElement.querySelector(
+            '.css-truncate-target'
+          );
+          if (textElement) {
+            labels.push(textElement.textContent.trim());
+          }
+        }
+      });
+
+      // Fallback: also look for other possible label selectors
+      if (labels.length === 0) {
+        const altLabelElements = document.querySelectorAll('[data-name]');
+        altLabelElements.forEach((element) => {
+          if (
+            element.getAttribute('data-name') &&
+            element.classList.contains('IssueLabel')
+          ) {
+            labels.push(element.getAttribute('data-name'));
+          }
+        });
+      }
+    } catch (error) {
+      console.error('GitHub Merge Guardian: Error extracting labels:', error);
+    }
+
+    return labels;
+  }
+
   // Apply merge rules to disable inappropriate merge options
   function applyMergeRules() {
     if (!settings || !settings.rules || !currentPageInfo) {
@@ -140,7 +186,8 @@
       wildcardMatch(rule.owner, pageInfo.owner) &&
       wildcardMatch(rule.repository, pageInfo.repository) &&
       wildcardMatch(rule.baseBranch, pageInfo.baseBranch) &&
-      wildcardMatch(rule.compareBranch, pageInfo.compareBranch)
+      wildcardMatch(rule.compareBranch, pageInfo.compareBranch) &&
+      labelMatches(rule.labels, pageInfo.labels)
     );
   }
 
@@ -156,6 +203,32 @@
 
     const regex = new RegExp(`^${regexPattern}$`, 'i'); // Case insensitive
     return regex.test(value);
+  }
+
+  // Check if a label pattern matches the PR labels
+  function labelMatches(labelPattern, prLabels) {
+    // If pattern is * or empty, match all
+    if (!labelPattern || labelPattern === '*') return true;
+
+    // If no labels on PR, only match if pattern is * or empty
+    if (!prLabels || prLabels.length === 0) {
+      return labelPattern === '*' || labelPattern === '';
+    }
+
+    // Split pattern by comma to handle multiple label patterns
+    const patterns = labelPattern
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+
+    // If no valid patterns, treat as wildcard
+    if (patterns.length === 0) return true;
+
+    // Check if any pattern matches any of the PR labels
+    return patterns.some((pattern) => {
+      // Check if this pattern matches any of the PR labels
+      return prLabels.some((label) => wildcardMatch(pattern, label));
+    });
   }
 
   // Disable unwanted merge options
@@ -425,10 +498,14 @@
                   node.querySelector('[role="menuitemradio"]') ||
                   node.querySelector('.prc-ActionList-ItemLabel-TmBhn') ||
                   node.querySelector('button[data-variant="primary"]') ||
+                  node.querySelector('.js-issue-labels') ||
+                  node.querySelector('.IssueLabel') ||
                   node.classList.contains('merge-pr') ||
                   node.classList.contains('merge-status-list') ||
                   node.classList.contains('prc-Overlay-Overlay-dVyJl') ||
-                  node.classList.contains('prc-ActionList-ActionList-X4RiC'))
+                  node.classList.contains('prc-ActionList-ActionList-X4RiC') ||
+                  node.classList.contains('js-issue-labels') ||
+                  node.classList.contains('IssueLabel'))
               ) {
                 shouldReapply = true;
               }

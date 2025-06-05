@@ -18,7 +18,8 @@
       <p class="description">
         <strong>Rules are matched by priority (top to bottom).</strong> The first matching rule in the list
         determines the merge strategy. You can drag and drop rules to reorder them and change their priority.
-        Use an asterisk (*) as a wildcard for any field. Rules are automatically saved as you update them.
+        Use an asterisk (*) as a wildcard for any field. For labels, you can specify multiple patterns separated by
+        commas (e.g., "bug,hotfix" or "comm,*fix*"). Rules are automatically saved as you update them.
       </p>
 
       <div class="rules-container">
@@ -29,6 +30,7 @@
             <div class="column-header">Repository</div>
             <div class="column-header">Base branch</div>
             <div class="column-header">Compare branch</div>
+            <div class="column-header">Labels</div>
             <div class="column-header">Merge strategy</div>
             <div class="column-header">Actions</div>
           </div>

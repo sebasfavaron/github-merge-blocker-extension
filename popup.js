@@ -20,7 +20,11 @@ async function loadSettings() {
       rules: [],
     });
 
-    rules = result.rules;
+    // Ensure backward compatibility by adding labels field to existing rules
+    rules = result.rules.map((rule) => ({
+      ...rule,
+      labels: rule.labels || '*',
+    }));
   } catch (error) {
     console.error('Error loading settings:', error);
     rules = [];
@@ -69,6 +73,9 @@ function createRuleRow(rule, index) {
     }" placeholder="*">
     <input type="text" class="rule-input" data-field="compareBranch" value="${
       rule.compareBranch
+    }" placeholder="*">
+    <input type="text" class="rule-input" data-field="labels" value="${
+      rule.labels || ''
     }" placeholder="*">
     <select class="rule-select" data-field="mergeStrategy">
       <option value="merge" ${
@@ -186,6 +193,7 @@ function addRule() {
     repository: '*',
     baseBranch: '*',
     compareBranch: '*',
+    labels: '*',
     mergeStrategy: 'merge',
   };
 
@@ -239,6 +247,7 @@ function applyPreset(action) {
       repository: '*',
       baseBranch: '*',
       compareBranch: '*mergeback*',
+      labels: '*',
       mergeStrategy: 'merge',
     },
     {
@@ -246,6 +255,7 @@ function applyPreset(action) {
       repository: '*',
       baseBranch: 'master',
       compareBranch: '*',
+      labels: '*',
       mergeStrategy: 'squash',
     },
     {
@@ -253,6 +263,7 @@ function applyPreset(action) {
       repository: '*',
       baseBranch: 'develop',
       compareBranch: '*',
+      labels: '*',
       mergeStrategy: 'squash',
     },
     {
@@ -260,6 +271,7 @@ function applyPreset(action) {
       repository: '*',
       baseBranch: '*',
       compareBranch: 'fix/*',
+      labels: '*',
       mergeStrategy: 'squash',
     },
   ];
