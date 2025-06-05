@@ -23,8 +23,6 @@ const DEFAULT_RULES = [
   },
 ];
 
-const DEFAULT_COLOR = '#ff8c00';
-
 const MERGE_STRATEGIES = {
   merge: 'Create a merge commit',
   squash: 'Squash and merge',
@@ -32,14 +30,12 @@ const MERGE_STRATEGIES = {
 };
 
 let rules = [];
-let mergeButtonColor = DEFAULT_COLOR;
 
 // Initialize popup
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
   renderRules();
   setupEventListeners();
-  updateExampleButton();
 });
 
 // Load settings from storage
@@ -47,17 +43,12 @@ async function loadSettings() {
   try {
     const result = await chrome.storage.sync.get({
       rules: DEFAULT_RULES,
-      mergeButtonColor: DEFAULT_COLOR,
     });
 
     rules = result.rules;
-    mergeButtonColor = result.mergeButtonColor;
-
-    document.getElementById('color-picker').value = mergeButtonColor;
   } catch (error) {
     console.error('Error loading settings:', error);
     rules = DEFAULT_RULES;
-    mergeButtonColor = DEFAULT_COLOR;
   }
 }
 
@@ -66,7 +57,6 @@ async function saveSettings() {
   try {
     await chrome.storage.sync.set({
       rules: rules,
-      mergeButtonColor: mergeButtonColor,
     });
   } catch (error) {
     console.error('Error saving settings:', error);
@@ -141,18 +131,6 @@ function createRuleRow(rule, index) {
 function setupEventListeners() {
   // Add rule button
   document.getElementById('add-rule').addEventListener('click', addRule);
-
-  // Color picker
-  document.getElementById('color-picker').addEventListener('input', (e) => {
-    mergeButtonColor = e.target.value;
-    updateExampleButton();
-    saveSettings();
-  });
-
-  // Reset button
-  document
-    .getElementById('reset-defaults')
-    .addEventListener('click', resetToDefaults);
 }
 
 // Add a new rule
@@ -183,22 +161,4 @@ function deleteRule(index) {
   rules.splice(index, 1);
   renderRules();
   saveSettings();
-}
-
-// Update example button color
-function updateExampleButton() {
-  const exampleButton = document.getElementById('example-button');
-  exampleButton.style.backgroundColor = mergeButtonColor;
-}
-
-// Reset to defaults
-async function resetToDefaults() {
-  rules = [...DEFAULT_RULES];
-  mergeButtonColor = DEFAULT_COLOR;
-
-  document.getElementById('color-picker').value = mergeButtonColor;
-
-  renderRules();
-  updateExampleButton();
-  await saveSettings();
 }
