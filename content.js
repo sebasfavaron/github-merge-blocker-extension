@@ -165,7 +165,7 @@
 
     const matchingRule = findMatchingRule();
 
-    if (matchingRule) {
+    if (matchingRule && matchingRule.mergeStrategy) {
       disableUnwantedMergeOptions(matchingRule.mergeStrategy);
     }
   }
@@ -183,11 +183,11 @@
   // Check if a rule matches the current page info
   function ruleMatches(rule, pageInfo) {
     return (
-      wildcardMatch(rule.owner, pageInfo.owner) &&
-      wildcardMatch(rule.repository, pageInfo.repository) &&
-      wildcardMatch(rule.baseBranch, pageInfo.baseBranch) &&
-      wildcardMatch(rule.compareBranch, pageInfo.compareBranch) &&
-      labelMatches(rule.labels, pageInfo.labels)
+      wildcardMatch(rule.owner || '*', pageInfo.owner) &&
+      wildcardMatch(rule.repository || '*', pageInfo.repository) &&
+      wildcardMatch(rule.baseBranch || '*', pageInfo.baseBranch) &&
+      wildcardMatch(rule.compareBranch || '*', pageInfo.compareBranch) &&
+      labelMatches(rule.labels || '*', pageInfo.labels)
     );
   }
 

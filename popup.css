@@ -71,11 +71,12 @@ h3 {
 .rules-container {
   border: 1px solid #d0d7de;
   border-radius: 6px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .rules-list-container {
   position: relative;
+  overflow: visible;
 }
 
 .rule-card {
@@ -145,6 +146,7 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: relative;
 }
 
 .field-label {
@@ -370,4 +372,104 @@ h3 {
 
 .modal-button.cancel:hover {
   background-color: #f6f8fa;
+}
+
+.remove-field-button {
+  position: absolute;
+  top: 24px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #656d76;
+  cursor: pointer;
+  font-size: 16px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.remove-field-button:hover {
+  background-color: #ffebe9;
+  color: #cf222e;
+}
+
+.add-field-container {
+  position: relative;
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+
+.add-field-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #f6f8fa;
+  border: 1px dashed #d0d7de;
+  border-radius: 6px;
+  color: #656d76;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+
+.add-field-button:hover {
+  background-color: #dbeafe;
+  border-color: #0969da;
+  color: #0969da;
+}
+
+.add-field-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.field-selector {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.field-option {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  color: #24292f;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.field-option:hover {
+  background-color: #f6f8fa;
+}
+
+.field-option:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.field-option:last-child {
+  border-radius: 0 0 6px 6px;
+}
+
+.field-option:only-child {
+  border-radius: 6px;
 }

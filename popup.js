@@ -4,6 +4,18 @@ const MERGE_STRATEGIES = {
   rebase: 'Rebase and merge',
 };
 
+const FIELD_OPTIONS = {
+  owner: { label: 'Owner', placeholder: 'GitHub username or organization' },
+  repository: { label: 'Repository', placeholder: 'Repository name' },
+  baseBranch: { label: 'Base Branch', placeholder: 'Target branch name' },
+  compareBranch: { label: 'Compare Branch', placeholder: 'Source branch name' },
+  labels: { label: 'Labels', placeholder: 'Comma-separated labels' },
+  mergeStrategy: {
+    label: 'Merge Strategy',
+    placeholder: 'Required merge method',
+  },
+};
+
 let rules = [];
 
 // Initialize popup
@@ -45,20 +57,117 @@ async function saveSettings() {
 // Render rules in the UI
 function renderRules() {
   const rulesList = document.getElementById('rules-list');
+
+  // Clean up event listeners from previous cards
+  const existingCards = rulesList.querySelectorAll('.rule-card');
+  existingCards.forEach((card) => {
+    if (card._closeFieldSelector) {
+      document.removeEventListener('click', card._closeFieldSelector);
+    }
+  });
+
+  // Hide any open field selectors
+  document.querySelectorAll('.field-selector').forEach((selector) => {
+    selector.style.display = 'none';
+  });
+
   rulesList.innerHTML = '';
 
+  if (rules.length === 0) {
+    rulesList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <p>No rules configured yet. Click "Add Rule" to get started.</p>
+      </div>
+    `;
+    return;
+  }
+
   rules.forEach((rule, index) => {
-    const ruleRow = createRuleRow(rule, index);
-    rulesList.appendChild(ruleRow);
+    const ruleCard = createRuleCard(rule, index);
+    rulesList.appendChild(ruleCard);
   });
 }
 
+// Check if a field is active (has a meaningful value)
+function isFieldActive(value) {
+  return value && value.trim() !== '' && value.trim() !== '*';
+}
+
+// Get active fields for a rule
+function getActiveFields(rule) {
+  const activeFields = [];
+
+  Object.keys(FIELD_OPTIONS).forEach((fieldKey) => {
+    if (fieldKey === 'mergeStrategy') {
+      // Merge strategy is always considered active if it exists
+      if (rule[fieldKey]) {
+        activeFields.push(fieldKey);
+      }
+    } else if (isFieldActive(rule[fieldKey])) {
+      activeFields.push(fieldKey);
+    } else if (rule._newlyAdded && rule._newlyAdded.includes(fieldKey)) {
+      // Include newly added fields even if they're empty
+      activeFields.push(fieldKey);
+    }
+  });
+
+  return activeFields;
+}
+
+// Get available fields that can be added to a rule
+function getAvailableFields(rule) {
+  const activeFields = getActiveFields(rule);
+  return Object.keys(FIELD_OPTIONS).filter(
+    (field) => !activeFields.includes(field)
+  );
+}
+
 // Create a rule card element
-function createRuleRow(rule, index) {
+function createRuleCard(rule, index) {
   const card = document.createElement('div');
   card.className = 'rule-card';
   card.setAttribute('data-index', index);
   card.draggable = true;
+
+  const activeFields = getActiveFields(rule);
+  const availableFields = getAvailableFields(rule);
+
+  // Generate field HTML
+  const fieldsHTML = activeFields
+    .map((fieldKey) => {
+      const field = FIELD_OPTIONS[fieldKey];
+      const value = rule[fieldKey] || '';
+
+      if (fieldKey === 'mergeStrategy') {
+        return `
+        <div class="field-group" data-field="${fieldKey}">
+          <label class="field-label">${field.label}</label>
+          <select class="rule-select" data-field="mergeStrategy">
+            <option value="merge" ${value === 'merge' ? 'selected' : ''}>${
+          MERGE_STRATEGIES.merge
+        }</option>
+            <option value="squash" ${value === 'squash' ? 'selected' : ''}>${
+          MERGE_STRATEGIES.squash
+        }</option>
+            <option value="rebase" ${value === 'rebase' ? 'selected' : ''}>${
+          MERGE_STRATEGIES.rebase
+        }</option>
+          </select>
+          <button class="remove-field-button" data-field="${fieldKey}" title="Remove field">×</button>
+        </div>
+      `;
+      } else {
+        return `
+        <div class="field-group" data-field="${fieldKey}">
+          <label class="field-label">${field.label}</label>
+          <input type="text" class="rule-input" data-field="${fieldKey}" value="${value}" placeholder="${field.placeholder}">
+          <button class="remove-field-button" data-field="${fieldKey}" title="Remove field">×</button>
+        </div>
+      `;
+      }
+    })
+    .join('');
 
   card.innerHTML = `
     <div class="rule-card-header">
@@ -76,50 +185,28 @@ function createRuleRow(rule, index) {
       </div>
     </div>
     <div class="rule-fields">
-      <div class="field-group">
-        <label class="field-label">Owner</label>
-        <input type="text" class="rule-input" data-field="owner" value="${
-          rule.owner
-        }" placeholder="*">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Repository</label>
-        <input type="text" class="rule-input" data-field="repository" value="${
-          rule.repository
-        }" placeholder="*">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Base Branch</label>
-        <input type="text" class="rule-input" data-field="baseBranch" value="${
-          rule.baseBranch
-        }" placeholder="*">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Compare Branch</label>
-        <input type="text" class="rule-input" data-field="compareBranch" value="${
-          rule.compareBranch
-        }" placeholder="*">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Labels</label>
-        <input type="text" class="rule-input" data-field="labels" value="${
-          rule.labels || ''
-        }" placeholder="* (comma-separated)">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Merge Strategy</label>
-        <select class="rule-select" data-field="mergeStrategy">
-          <option value="merge" ${
-            rule.mergeStrategy === 'merge' ? 'selected' : ''
-          }>${MERGE_STRATEGIES.merge}</option>
-          <option value="squash" ${
-            rule.mergeStrategy === 'squash' ? 'selected' : ''
-          }>${MERGE_STRATEGIES.squash}</option>
-          <option value="rebase" ${
-            rule.mergeStrategy === 'rebase' ? 'selected' : ''
-          }>${MERGE_STRATEGIES.rebase}</option>
-        </select>
-      </div>
+      ${fieldsHTML}
+      ${
+        availableFields.length > 0
+          ? `
+        <div class="add-field-container">
+          <button class="add-field-button" title="Add field">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 0a.75.75 0 01.75.75v3.5h3.5a.75.75 0 010 1.5h-3.5v3.5a.75.75 0 01-1.5 0v-3.5h-3.5a.75.75 0 010-1.5h3.5v-3.5A.75.75 0 018 0z"/>
+            </svg>
+            Add field
+          </button>
+          <div class="field-selector" style="display: none;">
+            ${availableFields
+              .map((fieldKey) => {
+                return `<button class="field-option" data-field="${fieldKey}">${FIELD_OPTIONS[fieldKey].label}</button>`;
+              })
+              .join('')}
+          </div>
+        </div>
+      `
+          : ''
+      }
     </div>
   `;
 
@@ -135,10 +222,137 @@ function createRuleRow(rule, index) {
   const deleteButton = card.querySelector('.delete-button');
   deleteButton.addEventListener('click', () => deleteRule(index));
 
+  // Add field removal listeners
+  const removeButtons = card.querySelectorAll('.remove-field-button');
+  removeButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+      const fieldToRemove = e.target.dataset.field;
+      removeField(index, fieldToRemove);
+    });
+  });
+
+  // Add field selector listeners
+  const addFieldButton = card.querySelector('.add-field-button');
+  const fieldSelector = card.querySelector('.field-selector');
+  const fieldOptions = card.querySelectorAll('.field-option');
+
+  if (addFieldButton && fieldSelector) {
+    addFieldButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      // Close any other open selectors first
+      document.querySelectorAll('.field-selector').forEach((selector) => {
+        if (selector !== fieldSelector) {
+          selector.style.display = 'none';
+        }
+      });
+
+      if (fieldSelector.style.display === 'block') {
+        fieldSelector.style.display = 'none';
+      } else {
+        // Reset positioning to default (below button)
+        fieldSelector.style.top = '100%';
+        fieldSelector.style.bottom = 'auto';
+        fieldSelector.style.marginTop = '4px';
+        fieldSelector.style.marginBottom = '0';
+
+        // Check if we need to position above instead
+        const buttonRect = addFieldButton.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const estimatedDropdownHeight = Math.min(
+          availableFields.length * 40 + 16,
+          200
+        );
+
+        // If there's not enough space below, position above
+        if (buttonRect.bottom + estimatedDropdownHeight > viewportHeight - 20) {
+          fieldSelector.style.top = 'auto';
+          fieldSelector.style.bottom = '100%';
+          fieldSelector.style.marginTop = '0';
+          fieldSelector.style.marginBottom = '4px';
+        }
+
+        fieldSelector.style.display = 'block';
+      }
+    });
+  }
+
+  fieldOptions.forEach((option, optionIndex) => {
+    option.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      const fieldToAdd = e.target.dataset.field;
+
+      // Hide the selector
+      if (fieldSelector) {
+        fieldSelector.style.display = 'none';
+      }
+
+      // Add the field
+      addField(index, fieldToAdd);
+    });
+  });
+
+  // Store reference to close function for cleanup
+  card._closeFieldSelector = (e) => {
+    if (fieldSelector && !card.contains(e.target)) {
+      fieldSelector.style.display = 'none';
+    }
+  };
+
+  document.addEventListener('click', card._closeFieldSelector);
+
   // Add drag and drop event listeners
   setupDragAndDrop(card, index);
 
   return card;
+}
+
+// Add a field to a rule
+function addField(ruleIndex, fieldKey) {
+  if (rules[ruleIndex]) {
+    // Set default value based on field type
+    if (fieldKey === 'mergeStrategy') {
+      rules[ruleIndex][fieldKey] = 'merge';
+    } else {
+      rules[ruleIndex][fieldKey] = '';
+    }
+
+    // Mark this field as newly added so it shows up immediately
+    rules[ruleIndex]._newlyAdded = rules[ruleIndex]._newlyAdded || [];
+    if (!rules[ruleIndex]._newlyAdded.includes(fieldKey)) {
+      rules[ruleIndex]._newlyAdded.push(fieldKey);
+    }
+
+    renderRules();
+    saveSettings();
+  }
+}
+
+// Remove a field from a rule
+function removeField(ruleIndex, fieldKey) {
+  if (rules[ruleIndex]) {
+    // Reset to default/empty value
+    if (fieldKey === 'mergeStrategy') {
+      delete rules[ruleIndex][fieldKey];
+    } else {
+      rules[ruleIndex][fieldKey] = '*';
+    }
+
+    // Clean up newly added tracking
+    if (rules[ruleIndex]._newlyAdded) {
+      const newlyAddedIndex = rules[ruleIndex]._newlyAdded.indexOf(fieldKey);
+      if (newlyAddedIndex > -1) {
+        rules[ruleIndex]._newlyAdded.splice(newlyAddedIndex, 1);
+        if (rules[ruleIndex]._newlyAdded.length === 0) {
+          delete rules[ruleIndex]._newlyAdded;
+        }
+      }
+    }
+
+    renderRules();
+    saveSettings();
+  }
 }
 
 // Setup event listeners
@@ -217,12 +431,7 @@ function setupRulesListDragAndDrop() {
 // Add a new rule
 function addRule() {
   const newRule = {
-    owner: '*',
-    repository: '*',
-    baseBranch: '*',
-    compareBranch: '*',
-    labels: '*',
-    mergeStrategy: 'merge',
+    // Start with empty rule - fields will be added as needed
   };
 
   rules.push(newRule);
@@ -234,6 +443,18 @@ function addRule() {
 function updateRule(index, field, value) {
   if (rules[index]) {
     rules[index][field] = value;
+
+    // Clean up newly added tracking if field now has a real value
+    if (isFieldActive(value) && rules[index]._newlyAdded) {
+      const newlyAddedIndex = rules[index]._newlyAdded.indexOf(field);
+      if (newlyAddedIndex > -1) {
+        rules[index]._newlyAdded.splice(newlyAddedIndex, 1);
+        if (rules[index]._newlyAdded.length === 0) {
+          delete rules[index]._newlyAdded;
+        }
+      }
+    }
+
     saveSettings();
   }
 }
@@ -271,35 +492,19 @@ function applyPreset(action) {
   // Define the RM Role preset rules
   const presetRules = [
     {
-      owner: '*',
-      repository: '*',
-      baseBranch: '*',
       compareBranch: '*mergeback*',
-      labels: '*',
       mergeStrategy: 'merge',
     },
     {
-      owner: '*',
-      repository: '*',
-      baseBranch: '*',
       compareBranch: 'fix/*',
-      labels: '*',
       mergeStrategy: 'squash',
     },
     {
-      owner: '*',
-      repository: '*',
       baseBranch: 'master',
-      compareBranch: '*',
-      labels: '*',
       mergeStrategy: 'squash',
     },
     {
-      owner: '*',
-      repository: '*',
       baseBranch: 'develop',
-      compareBranch: '*',
-      labels: '*',
       mergeStrategy: 'squash',
     },
   ];
