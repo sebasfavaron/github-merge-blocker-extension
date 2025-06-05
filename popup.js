@@ -5,11 +5,11 @@ const MERGE_STRATEGIES = {
 };
 
 const FIELD_OPTIONS = {
-  owner: { label: 'Owner', placeholder: 'GitHub username or organization' },
-  repository: { label: 'Repository', placeholder: 'Repository name' },
-  baseBranch: { label: 'Base Branch', placeholder: 'Target branch name' },
-  compareBranch: { label: 'Compare Branch', placeholder: 'Source branch name' },
-  labels: { label: 'Labels', placeholder: 'Comma-separated labels' },
+  owner: { label: 'Owner', placeholder: '' },
+  repository: { label: 'Repository', placeholder: '' },
+  baseBranch: { label: 'Base Branch', placeholder: '' },
+  compareBranch: { label: 'Compare Branch', placeholder: '' },
+  labels: { label: 'Labels', placeholder: '' },
   mergeStrategy: {
     label: 'Merge Strategy',
     placeholder: 'Required merge method',
@@ -132,49 +132,63 @@ function createRuleCard(rule, index) {
   const activeFields = getActiveFields(rule);
   const availableFields = getAvailableFields(rule);
 
-  // Generate field HTML
+  // Generate field HTML (excluding merge strategy which goes in header)
   const fieldsHTML = activeFields
+    .filter((fieldKey) => fieldKey !== 'mergeStrategy') // Merge strategy goes in header
     .map((fieldKey) => {
       const field = FIELD_OPTIONS[fieldKey];
       const value = rule[fieldKey] || '';
 
-      if (fieldKey === 'mergeStrategy') {
-        return `
-        <div class="field-group" data-field="${fieldKey}">
-          <label class="field-label">${field.label}</label>
-          <select class="rule-select" data-field="mergeStrategy">
-            <option value="merge" ${value === 'merge' ? 'selected' : ''}>${
-          MERGE_STRATEGIES.merge
-        }</option>
-            <option value="squash" ${value === 'squash' ? 'selected' : ''}>${
-          MERGE_STRATEGIES.squash
-        }</option>
-            <option value="rebase" ${value === 'rebase' ? 'selected' : ''}>${
-          MERGE_STRATEGIES.rebase
-        }</option>
-          </select>
-        </div>
-      `;
-      } else {
-        return `
+      return `
         <div class="field-group" data-field="${fieldKey}">
           <label class="field-label">${field.label}</label>
           <input type="text" class="rule-input" data-field="${fieldKey}" value="${value}" placeholder="${field.placeholder}">
           <button class="remove-field-button" data-field="${fieldKey}" title="Remove field">×</button>
         </div>
       `;
-      }
     })
     .join('');
+
+  const mergeStrategyValue = rule.mergeStrategy || 'merge';
 
   card.innerHTML = `
     <div class="rule-card-header">
       <div class="priority-badge">
         <div class="priority-number">${index + 1}</div>
-        <span>Priority</span>
+        <div class="drag-handle" title="Drag to reorder"></div>
+      </div>
+      <div class="merge-strategy-container">
+        <select class="merge-strategy-select" data-field="mergeStrategy">
+          <option value="merge" ${
+            mergeStrategyValue === 'merge' ? 'selected' : ''
+          }>${MERGE_STRATEGIES.merge}</option>
+          <option value="squash" ${
+            mergeStrategyValue === 'squash' ? 'selected' : ''
+          }>${MERGE_STRATEGIES.squash}</option>
+          <option value="rebase" ${
+            mergeStrategyValue === 'rebase' ? 'selected' : ''
+          }>${MERGE_STRATEGIES.rebase}</option>
+        </select>
       </div>
       <div class="rule-actions">
-        <div class="drag-handle" title="Drag to reorder"></div>
+        ${
+          availableFields.length > 0
+            ? `
+          <button class="add-field-button" title="Add field">
+            <svg viewBox="0 0 14 14" fill="currentColor">
+              <path d="M7 1a1 1 0 011 1v4h4a1 1 0 110 2H8v4a1 1 0 11-2 0V8H2a1 1 0 110-2h4V2a1 1 0 011-1z"/>
+            </svg>
+          </button>
+          <div class="field-selector" style="display: none;">
+            ${availableFields
+              .map((fieldKey) => {
+                return `<button class="field-option" data-field="${fieldKey}">${FIELD_OPTIONS[fieldKey].label}</button>`;
+              })
+              .join('')}
+          </div>
+        `
+            : ''
+        }
         <button class="delete-button" title="Delete rule">
           <svg viewBox="0 0 16 16" fill="currentColor">
             <path d="M11 1.75V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.575l.66-6.6a.75.75 0 00-1.492-.15L10.845 13.5H5.155l-.659-6.825z"/>
@@ -184,32 +198,13 @@ function createRuleCard(rule, index) {
     </div>
     <div class="rule-fields">
       ${fieldsHTML}
-      ${
-        availableFields.length > 0
-          ? `
-        <div class="add-field-container">
-          <button class="add-field-button" title="Add field">
-            <svg viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 0a.75.75 0 01.75.75v3.5h3.5a.75.75 0 010 1.5h-3.5v3.5a.75.75 0 01-1.5 0v-3.5h-3.5a.75.75 0 010-1.5h3.5v-3.5A.75.75 0 018 0z"/>
-            </svg>
-            Add field
-          </button>
-          <div class="field-selector" style="display: none;">
-            ${availableFields
-              .map((fieldKey) => {
-                return `<button class="field-option" data-field="${fieldKey}">${FIELD_OPTIONS[fieldKey].label}</button>`;
-              })
-              .join('')}
-          </div>
-        </div>
-      `
-          : ''
-      }
     </div>
   `;
 
   // Add event listeners for inputs
-  const inputs = card.querySelectorAll('.rule-input, .rule-select');
+  const inputs = card.querySelectorAll(
+    '.rule-input, .rule-select, .merge-strategy-select'
+  );
   inputs.forEach((input) => {
     input.addEventListener('input', (e) =>
       updateRule(index, e.target.dataset.field, e.target.value)
@@ -293,8 +288,14 @@ function createRuleCard(rule, index) {
 
   // Store reference to close function for cleanup
   card._closeFieldSelector = (e) => {
-    if (fieldSelector && !card.contains(e.target)) {
-      fieldSelector.style.display = 'none';
+    if (fieldSelector && fieldSelector.style.display === 'block') {
+      // Close if clicking outside the field selector dropdown or the add field button
+      if (
+        !fieldSelector.contains(e.target) &&
+        !addFieldButton.contains(e.target)
+      ) {
+        fieldSelector.style.display = 'none';
+      }
     }
   };
 
