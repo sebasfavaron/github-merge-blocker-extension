@@ -32,10 +32,11 @@ async function loadSettings() {
       rules: [],
     });
 
-    // Ensure backward compatibility by adding labels field to existing rules
+    // Ensure backward compatibility by adding required fields to existing rules
     rules = result.rules.map((rule) => ({
       ...rule,
       labels: rule.labels || '*',
+      mergeStrategy: rule.mergeStrategy || 'merge', // Ensure all rules have a merge strategy
     }));
   } catch (error) {
     console.error('Error loading settings:', error);
@@ -100,10 +101,8 @@ function getActiveFields(rule) {
 
   Object.keys(FIELD_OPTIONS).forEach((fieldKey) => {
     if (fieldKey === 'mergeStrategy') {
-      // Merge strategy is always considered active if it exists
-      if (rule[fieldKey]) {
-        activeFields.push(fieldKey);
-      }
+      // Merge strategy is always considered active and present
+      activeFields.push(fieldKey);
     } else if (isFieldActive(rule[fieldKey])) {
       activeFields.push(fieldKey);
     } else if (rule._newlyAdded && rule._newlyAdded.includes(fieldKey)) {
@@ -119,7 +118,7 @@ function getActiveFields(rule) {
 function getAvailableFields(rule) {
   const activeFields = getActiveFields(rule);
   return Object.keys(FIELD_OPTIONS).filter(
-    (field) => !activeFields.includes(field)
+    (field) => !activeFields.includes(field) && field !== 'mergeStrategy' // Never allow adding merge strategy since it's always present
   );
 }
 
@@ -154,7 +153,6 @@ function createRuleCard(rule, index) {
           MERGE_STRATEGIES.rebase
         }</option>
           </select>
-          <button class="remove-field-button" data-field="${fieldKey}" title="Remove field">×</button>
         </div>
       `;
       } else {
@@ -331,13 +329,10 @@ function addField(ruleIndex, fieldKey) {
 
 // Remove a field from a rule
 function removeField(ruleIndex, fieldKey) {
-  if (rules[ruleIndex]) {
+  if (rules[ruleIndex] && fieldKey !== 'mergeStrategy') {
+    // Prevent removing merge strategy
     // Reset to default/empty value
-    if (fieldKey === 'mergeStrategy') {
-      delete rules[ruleIndex][fieldKey];
-    } else {
-      rules[ruleIndex][fieldKey] = '*';
-    }
+    rules[ruleIndex][fieldKey] = '*';
 
     // Clean up newly added tracking
     if (rules[ruleIndex]._newlyAdded) {
@@ -431,7 +426,7 @@ function setupRulesListDragAndDrop() {
 // Add a new rule
 function addRule() {
   const newRule = {
-    // Start with empty rule - fields will be added as needed
+    mergeStrategy: 'merge', // Always include merge strategy by default
   };
 
   rules.push(newRule);
