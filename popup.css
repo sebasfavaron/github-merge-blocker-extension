@@ -154,6 +154,7 @@ h3 {
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
 }
 
 .drag-handle {
@@ -490,6 +491,10 @@ h3 {
   max-height: 200px;
   overflow-y: auto;
   min-width: 150px;
+}
+
+.add-field-container {
+  position: relative;
 }
 
 .add-field-container .field-selector {
