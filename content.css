@@ -1,0 +1,27 @@
+/* GitHub Merge Guardian Content Styles */
+
+/* Disabled merge option styling */
+.github-merge-guardian-disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* Custom styling for disabled merge buttons */
+.merge-pr .btn:disabled[title*='GitHub Merge Guardian'],
+.merge-status-list .btn:disabled[title*='GitHub Merge Guardian'] {
+  background-color: #f6f8fa !important;
+  color: #656d76 !important;
+  border-color: #d0d7de !important;
+}
+
+/* Disabled dropdown options */
+select option:disabled {
+  color: #656d76 !important;
+  background-color: #f6f8fa !important;
+}
+
+/* Highlight active merge button with custom color */
+.github-merge-guardian-active {
+  box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2) !important;
+}

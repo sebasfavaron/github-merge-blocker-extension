@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>GitHub Merge Guardian</h1>
+
+    <section class="rulesets-section">
+      <h2>Rulesets</h2>
+      <p class="description">
+        Higher rules take precedence over lower ones. When applying the rules, the first matching rule in the list
+        determines
+        the merge strategy. You can use an asterisk (*) as a wildcard for any item in the rule. As you update a rule, it
+        is
+        automatically saved.
+      </p>
+
+      <div class="rules-container">
+        <div class="rules-header">
+          <div class="drag-handle"></div>
+          <div class="column-header">Owner</div>
+          <div class="column-header">Repository</div>
+          <div class="column-header">Base branch</div>
+          <div class="column-header">Compare branch</div>
+          <div class="column-header">Merge strategy</div>
+          <div class="column-header">Actions</div>
+        </div>
+
+        <div id="rules-list">
+          <!-- Rules will be dynamically added here -->
+        </div>
+
+        <button id="add-rule" class="add-button">Add</button>
+      </div>
+    </section>
+
+    <section class="color-section">
+      <h2>Color</h2>
+      <p class="description">
+        Customize the merge button's color to emphasize the attention-grabbing effect. Select your preferred color from
+        the
+        color picker below to set it. You can also change the color from the extension's popup. As you update a color,
+        it is
+        automatically saved.
+      </p>
+
+      <div class="color-container">
+        <div class="color-picker-section">
+          <h3>Color Picker</h3>
+          <input type="color" id="color-picker" value="#ff8c00">
+        </div>
+
+        <div class="example-section">
+          <h3>Example</h3>
+          <button id="example-button" class="merge-button">Merge pull request</button>
+        </div>
+      </div>
+
+      <button id="reset-defaults" class="reset-button">Reset to Defaults</button>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
