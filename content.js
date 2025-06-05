@@ -238,7 +238,7 @@
 
     // Strategy mapping for the new GitHub interface
     const strategyMap = {
-      merge: ['create a merge commit', 'merge commit'],
+      merge: ['create a merge commit', 'merge commit', 'merge pull request'],
       squash: ['squash and merge', 'squash'],
       rebase: ['rebase and merge', 'rebase'],
     };
@@ -269,7 +269,44 @@
       }
     });
 
-    // Method 2: If dropdown not available, try alternative detection methods
+    // Method 2: Check the main merge button text to determine current strategy
+    if (!currentlySelected) {
+      const mainMergeButtons = document.querySelectorAll(
+        'button[data-variant="primary"]'
+      );
+      mainMergeButtons.forEach((button) => {
+        const buttonText = (button.textContent || '').toLowerCase();
+
+        if (buttonText.includes('merge') || buttonText.includes('confirm')) {
+          // Check button text for strategy indicators
+          Object.keys(strategyMap).forEach((strategy) => {
+            const keywords = strategyMap[strategy];
+            if (keywords.some((keyword) => buttonText.includes(keyword))) {
+              currentlySelected = strategy;
+            }
+          });
+        }
+      });
+    }
+
+    // Method 2.5: Check for merge dropdown trigger button text
+    if (!currentlySelected) {
+      const dropdownTriggers = document.querySelectorAll(
+        'button[aria-haspopup="menu"]'
+      );
+      dropdownTriggers.forEach((trigger) => {
+        const triggerText = (trigger.textContent || '').toLowerCase();
+
+        Object.keys(strategyMap).forEach((strategy) => {
+          const keywords = strategyMap[strategy];
+          if (keywords.some((keyword) => triggerText.includes(keyword))) {
+            currentlySelected = strategy;
+          }
+        });
+      });
+    }
+
+    // Method 3: If dropdown not available, try alternative detection methods
     if (!currentlySelected) {
       // Check if there's any text indicator near the merge button
       const mergeButtonContainer = document.querySelector(
@@ -287,7 +324,7 @@
         });
       }
 
-      // Method 3: Check for any other indicators (form inputs, data attributes, etc.)
+      // Method 4: Check for any other indicators (form inputs, data attributes, etc.)
       if (!currentlySelected) {
         // Look for hidden form inputs or data attributes that might indicate current strategy
         const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
@@ -310,7 +347,7 @@
         });
       }
 
-      // Method 4: Default assumption - GitHub typically defaults to merge commit
+      // Method 5: Default assumption - GitHub typically defaults to merge commit
       if (!currentlySelected) {
         currentlySelected = 'merge'; // GitHub's default is usually merge commit
       }
@@ -348,20 +385,68 @@
 
         // Disable main button if currently selected strategy doesn't match allowed
         if (currentlySelected && currentlySelected !== allowedStrategy) {
-          button.disabled = true;
-          button.style.opacity = '0.5';
-          button.style.cursor = 'not-allowed';
-          button.title = `GitHub Merge Guardian: Change merge method to "${allowedStrategy}" to enable this button`;
-          button.classList.add('github-merge-guardian-disabled');
-          buttonsDisabled++;
+          // Only disable if not already disabled by our extension
+          if (!button.classList.contains('github-merge-guardian-disabled')) {
+            button.disabled = true;
+            button.style.opacity = '0.5';
+            button.style.cursor = 'not-allowed';
+            button.style.pointerEvents = 'none';
+            button.title = `GitHub Merge Guardian: Change merge method to "${allowedStrategy}" to enable this button`;
+            button.classList.add('github-merge-guardian-disabled');
+
+            // Store original onclick if it exists so we can restore it
+            if (!button._guardianOriginalOnClick) {
+              button._guardianOriginalOnClick = button.onclick;
+            }
+
+            // Override onclick to block clicks
+            button.onclick = function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            };
+
+            buttonsDisabled++;
+          }
         } else {
-          // Re-enable if it was previously disabled and now correct strategy is selected
+          // Re-enable if it was previously disabled by our extension and now correct strategy is selected
           if (button.classList.contains('github-merge-guardian-disabled')) {
+            // Remove all our disabling properties
             button.disabled = false;
             button.style.opacity = '';
             button.style.cursor = '';
+            button.style.pointerEvents = '';
             button.title = '';
+            button.removeAttribute('disabled');
             button.classList.remove('github-merge-guardian-disabled');
+
+            // Restore original onclick handler if it was stored
+            if (button._guardianOriginalOnClick !== undefined) {
+              button.onclick = button._guardianOriginalOnClick;
+              delete button._guardianOriginalOnClick;
+            }
+
+            // Force the button to be enabled - sometimes GitHub's own logic might keep it disabled
+            setTimeout(() => {
+              if (
+                !button.classList.contains('github-merge-guardian-disabled')
+              ) {
+                button.disabled = false;
+                button.removeAttribute('disabled');
+                button.style.pointerEvents = '';
+              }
+            }, 50);
+
+            // Double-check after a longer delay
+            setTimeout(() => {
+              if (
+                !button.classList.contains('github-merge-guardian-disabled')
+              ) {
+                button.disabled = false;
+                button.removeAttribute('disabled');
+                button.style.pointerEvents = '';
+              }
+            }, 300);
           }
         }
       }
@@ -543,6 +628,11 @@
           extractPageInfo();
           applyMergeRules();
         }, 100);
+
+        // Also trigger a second check after a longer delay to handle slower UI updates
+        setTimeout(() => {
+          applyMergeRules();
+        }, 500);
       }
     });
 
@@ -556,6 +646,28 @@
     setInterval(() => {
       applyMergeRules();
     }, 2000);
+
+    // Add specific listeners for dropdown interactions
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+
+      // Check if user clicked on a merge strategy dropdown item
+      if (
+        target.closest('[role="menuitemradio"]') ||
+        target.closest('.prc-ActionList-Item') ||
+        target.closest('[data-testid*="merge"]')
+      ) {
+        // Apply rules after a short delay to allow GitHub's UI to update
+        setTimeout(() => {
+          applyMergeRules();
+        }, 200);
+
+        // Apply again after a longer delay for slower updates
+        setTimeout(() => {
+          applyMergeRules();
+        }, 800);
+      }
+    });
   }
 
   // Listen for settings changes
