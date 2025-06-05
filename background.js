@@ -5,29 +5,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
     // Set default settings on first install
     const defaultSettings = {
-      rules: [
-        {
-          owner: '*',
-          repository: '*',
-          baseBranch: '*',
-          compareBranch: 'SQJG-3702-web-gen',
-          mergeStrategy: 'merge',
-        },
-        {
-          owner: '*',
-          repository: '*',
-          baseBranch: '*',
-          compareBranch: '*mergeback*',
-          mergeStrategy: 'merge',
-        },
-        {
-          owner: '*',
-          repository: '*',
-          baseBranch: '*',
-          compareBranch: '*fix*',
-          mergeStrategy: 'squash',
-        },
-      ],
+      rules: [],
     };
 
     try {

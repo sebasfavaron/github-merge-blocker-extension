@@ -1,28 +1,3 @@
-// Default rules and settings
-const DEFAULT_RULES = [
-  {
-    owner: '*',
-    repository: '*',
-    baseBranch: '*',
-    compareBranch: 'SQJG-3702-web-gen',
-    mergeStrategy: 'merge',
-  },
-  {
-    owner: '*',
-    repository: '*',
-    baseBranch: '*',
-    compareBranch: '*mergeback*',
-    mergeStrategy: 'merge',
-  },
-  {
-    owner: '*',
-    repository: '*',
-    baseBranch: '*',
-    compareBranch: '*fix*',
-    mergeStrategy: 'squash',
-  },
-];
-
 const MERGE_STRATEGIES = {
   merge: 'Create a merge commit',
   squash: 'Squash and merge',
@@ -42,13 +17,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadSettings() {
   try {
     const result = await chrome.storage.sync.get({
-      rules: DEFAULT_RULES,
+      rules: [],
     });
 
     rules = result.rules;
   } catch (error) {
     console.error('Error loading settings:', error);
-    rules = DEFAULT_RULES;
+    rules = [];
   }
 }
 
