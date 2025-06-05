@@ -1,5 +1,5 @@
 body {
-  width: 900px;
+  width: 1000px;
   min-height: 600px;
   margin: 0;
   padding: 0;
@@ -83,7 +83,7 @@ h3 {
   display: grid;
   grid-template-columns:
     20px minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 1fr)
-    minmax(100px, 1fr) minmax(110px, 1fr) 60px;
+    minmax(100px, 1fr) minmax(100px, 1fr) minmax(110px, 1fr) 60px;
   gap: 8px;
   padding: 12px;
   background-color: #f6f8fa;
@@ -93,7 +93,7 @@ h3 {
   color: #656d76;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  min-width: 750px;
+  min-width: 850px;
 }
 
 .column-header {
@@ -120,12 +120,12 @@ h3 {
   display: grid;
   grid-template-columns:
     20px minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 1fr)
-    minmax(100px, 1fr) minmax(110px, 1fr) 60px;
+    minmax(100px, 1fr) minmax(100px, 1fr) minmax(110px, 1fr) 60px;
   gap: 8px;
   padding: 12px;
   border-bottom: 1px solid #d0d7de;
   align-items: center;
-  min-width: 750px;
+  min-width: 850px;
   transition: background-color 0.2s, transform 0.2s, opacity 0.2s;
 }
 
