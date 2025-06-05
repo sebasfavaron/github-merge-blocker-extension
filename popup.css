@@ -1,0 +1,230 @@
+body {
+  width: 800px;
+  min-height: 600px;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial,
+    sans-serif;
+  background-color: #ffffff;
+  color: #24292f;
+}
+
+.container {
+  padding: 24px;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 0 32px 0;
+  color: #24292f;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #24292f;
+}
+
+h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #656d76;
+}
+
+.description {
+  font-size: 14px;
+  color: #656d76;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.rulesets-section {
+  margin-bottom: 48px;
+}
+
+.rules-container {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.rules-header {
+  display: grid;
+  grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 60px;
+  gap: 12px;
+  padding: 12px;
+  background-color: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
+  font-weight: 600;
+  font-size: 12px;
+  color: #656d76;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+}
+
+.drag-handle {
+  width: 20px;
+  height: 20px;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%23656d76"><path d="M10 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-4 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm5-9a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: grab;
+}
+
+.rule-row {
+  display: grid;
+  grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 60px;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #d0d7de;
+  align-items: center;
+}
+
+.rule-row:last-child {
+  border-bottom: none;
+}
+
+.rule-input {
+  padding: 6px 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #24292f;
+}
+
+.rule-input:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+}
+
+.rule-select {
+  padding: 6px 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #24292f;
+  cursor: pointer;
+}
+
+.rule-select:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: #656d76;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.delete-button:hover {
+  color: #cf222e;
+  background-color: #ffebe9;
+}
+
+.delete-button svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.add-button {
+  background-color: #1f883d;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 16px;
+  transition: background-color 0.2s;
+}
+
+.add-button:hover {
+  background-color: #1a7f37;
+}
+
+.color-section {
+  margin-bottom: 24px;
+}
+
+.color-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.color-picker-section,
+.example-section {
+  display: flex;
+  flex-direction: column;
+}
+
+#color-picker {
+  width: 60px;
+  height: 32px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+#color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+#color-picker::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+.merge-button {
+  background-color: #ff8c00;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: fit-content;
+}
+
+.merge-button:hover {
+  opacity: 0.9;
+}
+
+.reset-button {
+  background-color: #f6f8fa;
+  color: #24292f;
+  border: 1px solid #d0d7de;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.reset-button:hover {
+  background-color: #f3f4f6;
+}
