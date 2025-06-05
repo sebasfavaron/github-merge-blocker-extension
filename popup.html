@@ -16,11 +16,9 @@
         <button id="load-preset" class="preset-button">Load RM Role preset</button>
       </div>
       <p class="description">
-        Higher rules take precedence over lower ones. When applying the rules, the first matching rule in the list
-        determines
-        the merge strategy. You can use an asterisk (*) as a wildcard for any item in the rule. As you update a rule, it
-        is
-        automatically saved.
+        <strong>Rules are matched by priority (top to bottom).</strong> The first matching rule in the list
+        determines the merge strategy. You can drag and drop rules to reorder them and change their priority.
+        Use an asterisk (*) as a wildcard for any field. Rules are automatically saved as you update them.
       </p>
 
       <div class="rules-container">
@@ -35,7 +33,7 @@
             <div class="column-header">Actions</div>
           </div>
 
-          <div id="rules-list">
+          <div id="rules-list" class="rules-list-container">
             <!-- Rules will be dynamically added here -->
           </div>
         </div>
