@@ -32,14 +32,6 @@ A Chrome extension that controls GitHub pull request merge options based on conf
 5. Customize the merge button color in the Color section
 6. Visit any GitHub pull request page to see the extension in action
 
-## Default Rules
-
-The extension comes with these default rules:
-
-- Branches matching `SQJG-3702-web-gen` → Create a merge commit
-- Branches matching `*mergeback*` → Create a merge commit
-- Branches matching `*fix*` → Squash and merge
-
 ## Rule Examples
 
 - Allow only squash merge for feature branches: `*/*, */*, main, feature/*, squash`
