@@ -108,6 +108,12 @@ h3 {
   background-repeat: no-repeat;
   background-position: center;
   cursor: grab;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.drag-handle:hover {
+  opacity: 1;
 }
 
 .rule-row {
@@ -120,10 +126,66 @@ h3 {
   border-bottom: 1px solid #d0d7de;
   align-items: center;
   min-width: 750px;
+  transition: background-color 0.2s, transform 0.2s, opacity 0.2s;
 }
 
 .rule-row:last-child {
   border-bottom: none;
+}
+
+/* Drag and drop states */
+.rule-row.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+  background-color: #f6f8fa;
+  cursor: grabbing;
+}
+
+.rule-row.drag-over {
+  background-color: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.rule-row.drag-above {
+  border-top: 2px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.rule-row.drag-below {
+  border-bottom: 2px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.rules-list-container {
+  position: relative;
+}
+
+.drop-indicator {
+  height: 2px;
+  background-color: #3b82f6;
+  border-radius: 1px;
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  transition: opacity 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.drop-indicator.active {
+  opacity: 1;
+}
+
+.priority-indicator {
+  font-size: 12px;
+  color: #656d76;
+  font-weight: 600;
+  background-color: #f6f8fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 8px;
+  min-width: 20px;
+  text-align: center;
 }
 
 .rule-input {
