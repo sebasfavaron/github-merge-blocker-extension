@@ -28,7 +28,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
           mergeStrategy: 'squash',
         },
       ],
-      mergeButtonColor: '#ff8c00',
     };
 
     try {

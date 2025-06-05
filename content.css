@@ -20,8 +20,3 @@ select option:disabled {
   color: #656d76 !important;
   background-color: #f6f8fa !important;
 }
-
-/* Highlight active merge button with custom color */
-.github-merge-guardian-active {
-  box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2) !important;
-}

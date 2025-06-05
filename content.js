@@ -40,13 +40,12 @@
     try {
       const result = await chrome.storage.sync.get({
         rules: [],
-        mergeButtonColor: '#ff8c00',
       });
       console.log('GitHub Merge Guardian: Settings loaded:', result);
       settings = result;
     } catch (error) {
       console.error('GitHub Merge Guardian: Error loading settings:', error);
-      settings = { rules: [], mergeButtonColor: '#ff8c00' };
+      settings = { rules: [] };
     }
   }
 
@@ -150,7 +149,6 @@
         matchingRule.mergeStrategy
       );
       disableUnwantedMergeOptions(matchingRule.mergeStrategy);
-      customizeMergeButtonColor();
     } else {
       console.log('GitHub Merge Guardian: No matching rule found');
     }
@@ -478,28 +476,6 @@
         'GitHub Merge Guardian: No dropdown items found - using alternative detection methods'
       );
     }
-  }
-
-  // Customize merge button color
-  function customizeMergeButtonColor() {
-    if (!settings.mergeButtonColor) return;
-
-    const mergeButtons = document.querySelectorAll(
-      '.btn-primary[data-testid*="merge"], ' +
-        '.merge-pr .btn-primary, ' +
-        '[data-testid="merge-pull-request"] button, ' +
-        '.merge-commit-button'
-    );
-
-    mergeButtons.forEach((button) => {
-      if (
-        button.type === 'submit' ||
-        button.textContent.toLowerCase().includes('merge')
-      ) {
-        button.style.backgroundColor = settings.mergeButtonColor;
-        button.style.borderColor = settings.mergeButtonColor;
-      }
-    });
   }
 
   // Observe page changes for dynamic content
