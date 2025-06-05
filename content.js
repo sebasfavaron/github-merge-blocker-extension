@@ -249,11 +249,29 @@
     );
     mainMergeButtons.forEach((button) => {
       const buttonText = (button.textContent || '').toLowerCase();
+
+      // Check if this is a confirmation button (starts with "confirm")
+      const isConfirmButton = buttonText.includes('confirm');
+
       if (
         buttonText.includes('merge pull request') ||
-        buttonText.includes('merge')
+        buttonText.includes('merge') ||
+        isConfirmButton
       ) {
         buttonsFound++;
+
+        // Don't disable confirmation buttons - they should always be enabled once visible
+        if (isConfirmButton) {
+          // Always ensure confirmation buttons are enabled
+          if (button.classList.contains('github-merge-guardian-disabled')) {
+            button.disabled = false;
+            button.style.opacity = '';
+            button.style.cursor = '';
+            button.title = '';
+            button.classList.remove('github-merge-guardian-disabled');
+          }
+          return; // Skip further processing for confirmation buttons
+        }
 
         // Disable main button if currently selected strategy doesn't match allowed
         if (currentlySelected && currentlySelected !== allowedStrategy) {
@@ -342,7 +360,8 @@
       if (
         !allText.includes('merge') &&
         !allText.includes('squash') &&
-        !allText.includes('rebase')
+        !allText.includes('rebase') &&
+        !allText.includes('confirm')
       ) {
         return;
       }
@@ -352,6 +371,20 @@
         allText.includes('merge pull request') ||
         allText.includes('select merge method')
       ) {
+        return;
+      }
+
+      // Never disable confirmation buttons - they should always work once visible
+      if (allText.includes('confirm')) {
+        // Always ensure confirmation buttons are enabled
+        if (button.classList.contains('github-merge-guardian-disabled')) {
+          button.disabled = false;
+          button.style.opacity = '';
+          button.style.cursor = '';
+          button.style.pointerEvents = '';
+          button.title = '';
+          button.classList.remove('github-merge-guardian-disabled');
+        }
         return;
       }
 
@@ -378,6 +411,7 @@
       let shouldReapply = false;
 
       mutations.forEach((mutation) => {
+        // Check for added nodes
         if (mutation.addedNodes.length > 0) {
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
@@ -401,6 +435,30 @@
             }
           });
         }
+
+        // Check for text content changes (when buttons change text like "Merge" -> "Confirm merge")
+        if (
+          mutation.type === 'childList' ||
+          mutation.type === 'characterData'
+        ) {
+          const target = mutation.target;
+          if (target && target.nodeType === Node.ELEMENT_NODE) {
+            // Check if this is a button or contains buttons
+            if (target.tagName === 'BUTTON' || target.querySelector('button')) {
+              const text = target.textContent
+                ? target.textContent.toLowerCase()
+                : '';
+              if (
+                text.includes('merge') ||
+                text.includes('confirm') ||
+                text.includes('squash') ||
+                text.includes('rebase')
+              ) {
+                shouldReapply = true;
+              }
+            }
+          }
+        }
       });
 
       if (shouldReapply) {
@@ -414,6 +472,7 @@
     observer.observe(document.body, {
       childList: true,
       subtree: true,
+      characterData: true,
     });
 
     // Also try to reapply rules periodically for dynamic content
