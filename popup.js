@@ -495,6 +495,10 @@ function applyPreset(action) {
       mergeStrategy: 'merge',
     },
     {
+      compareBranch: '*mergeback*',
+      mergeStrategy: 'merge',
+    },
+    {
       labels: '*fix*',
       mergeStrategy: 'squash',
     },
