@@ -490,6 +490,11 @@ function applyPreset(action) {
       mergeStrategy: 'merge',
     },
     {
+      baseBranch: 'master*',
+      compareBranch: 'release*',
+      mergeStrategy: 'merge',
+    },
+    {
       baseBranch: 'develop',
       compareBranch: 'release*',
       mergeStrategy: 'merge',
