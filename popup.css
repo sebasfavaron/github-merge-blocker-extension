@@ -531,3 +531,41 @@ h3 {
 .field-option:only-child {
   border-radius: 6px;
 }
+
+/* Detail field styles - small and unintrusive */
+.detail-field {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+
+.detail-field .field-label {
+  font-size: 11px;
+  color: #8b949e;
+  opacity: 0.8;
+}
+
+.detail-input {
+  font-size: 12px;
+  padding: 6px 20px 6px 10px;
+  color: #656d76;
+  background-color: #f6f8fa;
+  border-color: #d8dee4;
+  font-style: italic;
+}
+
+.detail-input:focus {
+  background-color: #ffffff;
+  color: #24292f;
+  font-style: normal;
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
+}
+
+.detail-input::placeholder {
+  color: #8b949e;
+  font-style: italic;
+}
+
+.detail-field .remove-field-button {
+  top: 20px;
+}

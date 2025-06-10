@@ -11,6 +11,7 @@ const FIELD_OPTIONS = {
   compareBranch: { label: 'Compare Branch', placeholder: '' },
   labels: { label: 'Labels', placeholder: '' },
   mergeStrategy: { label: 'Merge Strategy', placeholder: '' },
+  detail: { label: 'Detail', placeholder: 'Optional note about this rule...' },
 };
 
 let rules = [];
@@ -34,6 +35,7 @@ async function loadSettings() {
       ...rule,
       labels: rule.labels || '*',
       mergeStrategy: rule.mergeStrategy || 'merge', // Ensure all rules have a merge strategy
+      detail: rule.detail || '',
     }));
   } catch (error) {
     console.error('Error loading settings:', error);
@@ -135,11 +137,18 @@ function createRuleCard(rule, index) {
     .map((fieldKey) => {
       const field = FIELD_OPTIONS[fieldKey];
       const value = rule[fieldKey] || '';
+      const isDetailField = fieldKey === 'detail';
 
       return `
-        <div class="field-group" data-field="${fieldKey}">
+        <div class="field-group ${
+          isDetailField ? 'detail-field' : ''
+        }" data-field="${fieldKey}">
           <label class="field-label">${field.label}</label>
-          <input type="text" class="rule-input" data-field="${fieldKey}" value="${value}" placeholder="${field.placeholder}">
+          <input type="text" class="rule-input ${
+            isDetailField ? 'detail-input' : ''
+          }" data-field="${fieldKey}" value="${value}" placeholder="${
+        field.placeholder
+      }">
           <button class="remove-field-button" data-field="${fieldKey}" title="Remove field">×</button>
         </div>
       `;
@@ -488,27 +497,33 @@ function applyPreset(action) {
       baseBranch: 'release*',
       compareBranch: 'master*',
       mergeStrategy: 'merge',
+      detail: 'Mergeback from master to release',
     },
     {
       baseBranch: 'master*',
       compareBranch: 'release*',
       mergeStrategy: 'merge',
+      detail: 'Deploy from release to master',
     },
     {
       baseBranch: 'develop',
       compareBranch: 'release*',
       mergeStrategy: 'merge',
+      detail: 'Mergeback from release to develop',
     },
     {
       compareBranch: '*mergeback*',
       mergeStrategy: 'merge',
+      detail: 'Mergebacks in general',
     },
     {
       labels: '*fix*',
       mergeStrategy: 'squash',
+      detail: 'Fixes in general',
     },
     {
       mergeStrategy: 'squash',
+      detail: 'Default merge strategy',
     },
   ];
 
